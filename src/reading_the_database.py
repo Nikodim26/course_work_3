@@ -9,17 +9,10 @@ def about_financial_transactions_xlsx(file_data: str) -> list[dict]:
 
     path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + file_data
     try:
-        return pd.read_excel(path).to_dict("records")
+        return pd.read_excel(path)
     except Exception as e:
         print(f'Произошла ошибка: {e}')
         return []
 
-
-transactions=about_financial_transactions_xlsx('operations.xlsx')
-times=[i['Дата операции'] for i in transactions]
-print(min(times),max(times))
-
-# for i in transactions:
-#
-#     print(json.dumps(i,ensure_ascii=False,indent=4))
-#     break
+# transactions=about_financial_transactions_xlsx('operations.xlsx')
+# print(json.dumps(transactions[0],ensure_ascii=False,indent=4))
