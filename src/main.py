@@ -1,19 +1,11 @@
-from datetime import datetime
-
 from day_phase import determining_the_phase_of_the_day
+from views import working_with_transactions
 
 
-def main(request_time):
+def main(request_time: str, period: int = 0) -> None:
     print(determining_the_phase_of_the_day())
-    request_time=datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S")
+
+    working_with_transactions(request_time, period)
 
 
-
-
-
-
-
-
-
-
-# main('2019-05-21 12:49:53')
+main('2019-05-21 12:49:53')

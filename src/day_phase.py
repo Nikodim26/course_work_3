@@ -11,10 +11,10 @@ def determining_the_phase_of_the_day() -> str:
         if time_list[i] <= datetime.now().time() <= time_list[i + 1]:
             match i:
                 case 0:
-                    return "Доброе утро"
+                    return "Доброе утро !"
                 case 2:
-                    return "Добрый день"
+                    return "Добрый день !"
                 case 4:
-                    return "Добрый вечер"
+                    return "Добрый вечер !"
 
-    return "Доброй ночи"
+    return "Доброй ночи !"
