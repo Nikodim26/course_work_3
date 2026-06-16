@@ -29,13 +29,13 @@ def working_with_transactions(request_time: str):
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
     types_of_currencies = financial_transactions['Валюта операции'].unique()
-    categories = dict(financial_transactions["Категория"].value_counts().nlargest(5))
+    categories = financial_transactions["Категория"].unique()
 
     # Формирование JSON
     json_str = {
         "greeting": determining_the_phase_of_the_day(),
         "cards": recording_card_numbers(card_numbers,types_of_currencies,financial_transactions),
-        "top_transactions": top_transaction_record(categories,financial_transactions)
+        "top_transactions": top_transaction_record(card_numbers, types_of_currencies,categories,financial_transactions)
     }
 
     return json_str
