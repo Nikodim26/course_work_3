@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from external_api import currency_conversion
+
 
 def top_transaction_record(card_numbers, types_of_currencies, categories, financial_transactions):
     """Формирует список топовых транзакций в рублях"""
@@ -23,13 +25,13 @@ def top_transaction_record(card_numbers, types_of_currencies, categories, financ
                     top_transactions.append(
                         {
                             "date": date,
-                            "amount": abs(round(float(amount_max), 2)),
+                            "amount": abs(round(float(amount_max * currency_conversion(currency)), 2)),
                             "category": categori,
                             "description": str(top_transactions_df.iloc[0, 6])
                         }
                     )
 
-    top_transactions=sorted(top_transactions,key=lambda x:x["amount"],reverse=True)[:5]
+    top_transactions = sorted(top_transactions, key=lambda x: x["amount"], reverse=True)[:5]
 
     return top_transactions
 
@@ -49,8 +51,24 @@ def recording_card_numbers(card_numbers, types_of_currencies, financial_transact
                 cards.append(
                     {
                         "last_digits": card_number[1:],
-                        "total_spent": round(float(amount_of_expenses), 2),
+                        "total_spent": round(float(amount_of_expenses * currency_conversion(currency)), 2),
                         "cashback": round(float(amount_of_expenses / 100), 2),
                     }
                 )
     return cards
+
+def record_exchange_rates(types_of_currencies):
+    """Формирует запись о курсах валют"""
+
+    exchange_rates=[]
+    for currency in types_of_currencies:
+        if currency!="RUB":
+            exchange_rates.append(
+                {
+                    "currency": currency,
+                    "rate": round(currency_conversion(currency),2)
+                }
+            )
+
+
+    return exchange_rates

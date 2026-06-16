@@ -10,6 +10,6 @@ def currency_conversion(currency: str):
     except Exception:
         print("Что-то, блин, не так, как хотелось бы")
 
-    return response.json()["Valute"].get(currency)["Value"]
+    return response.json()["Valute"].get(currency)["Value"] if currency !='RUB' else 1
 
-# currency_conversion('EUR')
+# print(currency_conversion('USD'))
