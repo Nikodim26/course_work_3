@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 
@@ -68,7 +67,7 @@ def record_exchange_rates(types_of_currencies):
 
     exchange_rates = []
     for currency in types_of_currencies:
-        if currency != "RUB":
+        if currency.upper != "RUB":
             exchange_rates.append(
                 {
                     "currency": currency,
@@ -95,6 +94,7 @@ def stock_quote_search(user_stocks):
             price = dict(requests.get(url2).json())['results'][0]['vw'] * currency_conversion(currency.upper())
         except Exception as e:
             print(e)
+
         stocks.append(
             {
                 "stock": stock,
@@ -103,6 +103,3 @@ def stock_quote_search(user_stocks):
         )
 
     return stocks
-
-
-# print(stock_quote_search(["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]))
