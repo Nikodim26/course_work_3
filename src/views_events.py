@@ -1,4 +1,8 @@
+import json
+import os
+
 from reading_the_database import working_with_transactions_period
+from utils import record_exchange_rates, stock_quote_search
 
 
 def working_with_transactions_events(request_time: str, period="m"):
@@ -8,11 +12,15 @@ def working_with_transactions_events(request_time: str, period="m"):
     df = working_with_transactions_period(request_time, period)
 
     total_amount_expenses = abs(df.query('`Сумма операции` < 0')['Сумма операции'].sum())  # общие затраты
-    total_amount_receipts = df.query('`Сумма операции` > 0')['Сумма операции'].sum()  # общие постуаления
+    total_amount_receipts = df.query('`Сумма операции` > 0')['Сумма операции'].sum()  # общие
+
+    category_dictionary_income = df[df["Сумма операции"] > 0].groupby("Категория")["Сумма операции"].sum()
+    category_dictionary_income = sorted(category_dictionary_income.items(), key=lambda item: item[1])
 
     # затраты по категориям
     category_dictionary = df[df["Сумма операции"] < 0].groupby("Категория")["Сумма операции"].sum()
     category_dictionary = sorted(category_dictionary.items(), key=lambda item: item[1])
+
     # Траты по 7 категориям
     main = []
     top_expenses = 0
@@ -47,12 +55,36 @@ def working_with_transactions_events(request_time: str, period="m"):
     ]
     transfers_and_cash = sorted(transfers_and_cash, key=lambda x: x["amount"], reverse=True)
 
+    main_income = []
+    for category in category_dictionary_income:
+        main_income.append(
+            {
+                "category": category[0],
+                "amount": round(abs(category[1]), 2)
+            }
+        )
+
+    income = {
+        "total_amount": round(total_amount_receipts, 2),
+        "main": main_income
+    }
+
+    # Чтение файла с заготовками
+    path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + 'user_settings.json'
+    with open(path, 'r') as f:
+        data = json.load(f)
+        user_currencies = data['user_currencies']
+        user_stocks = data['user_stocks']
+
     # Формирование JSON
     json_str = {
         "expenses": {
             "total_amount": round(total_amount_expenses, 2),
             "main": main,
-            'transfers_and_cash': transfers_and_cash
+            'transfers_and_cash': transfers_and_cash,
+            'income': income,
+            "currency_rates": record_exchange_rates(user_currencies),
+            "stock_prices": stock_quote_search(user_stocks)
         }
     }
 
