@@ -3,10 +3,17 @@ import os
 
 from reading_the_database import working_with_transactions_period
 from views import working_with_transactions
+from views_events import working_with_transactions_events
 
 
 def main():
-    return working_with_transactions('2018-05-28 12:49:53','m')
+    """Функция выдает JSON строки"""
+
+    main_json=working_with_transactions('2018-05-28 12:49:53','m')
+    # json_events=working_with_transactions_events('2018-05-28 12:49:53','m')
+
+    # return json_events
+    return main_json#,json_events
 
 
 if __name__ == '__main__':

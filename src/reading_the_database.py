@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
+from external_api import currency_conversion
+
 
 def working_with_transactions_period(request_time, period) -> list[dict]:
-    """Определяет период поиска """
+    """Считывает данные из файла и фильтрует их, заменяет записи на более удобные (суммы в валюте на рубли)"""
 
     path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + 'operations.xlsx'
     try:
@@ -26,14 +28,18 @@ def working_with_transactions_period(request_time, period) -> list[dict]:
         case 'ALL':
             request_time_start = df['Дата операции'].min()
 
-    df['Дата операции'] = pd.to_datetime(df['Дата операции'], dayfirst=True)
-
     # Фильтрация списка транзакций
     df = df.loc[
-        (df['Дата операции'] <= pd.to_datetime(request_time_end)) &
-        (df['Дата операции'] >= pd.to_datetime(request_time_start)) &
+        (pd.to_datetime(df['Дата операции'],dayfirst=True) <= request_time_end) &
+        (pd.to_datetime(df['Дата операции'],dayfirst=True) >= request_time_start) &
         (df['Номер карты'].notnull()) &
-        (df['Сумма операции'] < 0) &
-        (df['Статус'].isin(['OK']))]
+        (df['Статус'].isin(['OK']))
+        ]
+    df['Номер карты'] = df['Номер карты'].apply(lambda x: x.replace('*', ''))
+
+    # Замена сумм в валюте на рубли
+    exchange_rates = {currency: currency_conversion(currency) for currency in df['Валюта операции'].unique()}
+    df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * exchange_rates[row['Валюта операции']], axis=1)
+
 
     return df

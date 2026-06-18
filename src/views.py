@@ -12,9 +12,11 @@ def working_with_transactions(request_time: str, period="m"):
     # Чтение данных и их фильтрация
     financial_transactions = working_with_transactions_period(request_time, period)
 
+    financial_transactions = financial_transactions.loc[financial_transactions['Сумма операции'] < 0]
+
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
-    types_of_currencies = financial_transactions['Валюта операции'].unique()
+    # types_of_currencies = financial_transactions['Валюта операции'].unique()
     categories = financial_transactions["Категория"].unique()
 
     # Чтение файла с заготовками
@@ -27,9 +29,8 @@ def working_with_transactions(request_time: str, period="m"):
     # Формирование JSON
     json_str = {
         "greeting": determining_the_phase_of_the_day(),
-        "cards": recording_card_numbers(card_numbers, types_of_currencies, financial_transactions),
-        "top_transactions": top_transaction_record(card_numbers, types_of_currencies, categories,
-                                                   financial_transactions),
+        "cards": recording_card_numbers(card_numbers, financial_transactions),
+        "top_transactions": top_transaction_record(card_numbers, categories,financial_transactions),
         "currency_rates": record_exchange_rates(user_currencies),
         "stock_prices": stock_quote_search(user_stocks)
     }
