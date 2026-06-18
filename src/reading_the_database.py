@@ -4,23 +4,20 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
-def about_financial_transactions(request_time, range_requested) -> list[dict]:
-    """Принимает на вход путь до XLSX-файла и возвращает список словарей с данными о финансовых транзакциях"""
+def working_with_transactions_period(request_time, period) -> list[dict]:
+    """Определяет период поиска """
 
     path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + 'operations.xlsx'
-    request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S")
-
     try:
         df = pd.read_excel(path).iloc[:, [0, 2, 3, 4, 5, 9, 11]]
     except Exception as e:
         print(f'Произошла ошибка: {e}')
         return []
 
-    # Перевод даты операции в другой формат
-    df['Дата операции'] = pd.to_datetime(df['Дата операции'], dayfirst=True)
+    request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S")
 
-    match range_requested.upper():
-        case 'M' | 'М':
+    match period.upper():
+        case 'M' | 'М':  # Учет алфавита
             request_time_start = request_time_end.replace(day=1, hour=0, minute=0, second=0)
         case 'W':
             request_time_start = request_time_end - timedelta(weeks=1)
@@ -28,6 +25,8 @@ def about_financial_transactions(request_time, range_requested) -> list[dict]:
             request_time_start = request_time_end.replace(day=1, month=1, hour=0, minute=0, second=0)
         case 'ALL':
             request_time_start = df['Дата операции'].min()
+
+    df['Дата операции'] = pd.to_datetime(df['Дата операции'], dayfirst=True)
 
     # Фильтрация списка транзакций
     df = df.loc[

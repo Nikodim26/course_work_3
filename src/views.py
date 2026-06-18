@@ -1,20 +1,16 @@
 import json
 import os
 
-import pandas as pd
-
 from day_phase import determining_the_phase_of_the_day
-from reading_the_database import about_financial_transactions
+from reading_the_database import working_with_transactions_period
 from utils import top_transaction_record, recording_card_numbers, record_exchange_rates, stock_quote_search
 
 
-def working_with_transactions(request_time: str, range_requested: str):
+def working_with_transactions(request_time: str, period="m"):
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
-    pd.options.display.expand_frame_repr = False
-
     # Чтение данных и их фильтрация
-    financial_transactions = about_financial_transactions(request_time, range_requested)
+    financial_transactions = working_with_transactions_period(request_time, period)
 
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
@@ -39,9 +35,3 @@ def working_with_transactions(request_time: str, range_requested: str):
     }
 
     return json_str
-
-if __name__=='__main__':
-    path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + '1.json'
-    data=working_with_transactions('2018-05-28 12:49:53', 'M')
-    with open(path, 'w', encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
