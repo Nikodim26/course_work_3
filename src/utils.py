@@ -91,6 +91,7 @@ def stock_quote_search(user_stocks):
         stocks.append(
             {
                 "stock": stock,
+
                 "price": round(price, 2)
             }
         )
