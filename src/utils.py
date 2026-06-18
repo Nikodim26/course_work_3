@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from dotenv import load_dotenv
@@ -52,11 +52,12 @@ def recording_card_numbers(card_numbers, types_of_currencies, financial_transact
                 ]
             if not df.empty:
                 amount_of_expenses = abs(df['Сумма операции'].sum())
+                total_spent=round(float(amount_of_expenses * currency_conversion(currency)), 2)
                 cards.append(
                     {
                         "last_digits": card_number[1:],
-                        "total_spent": round(float(amount_of_expenses * currency_conversion(currency)), 2),
-                        "cashback": round(float(amount_of_expenses / 100), 2),
+                        "total_spent": total_spent,
+                        "cashback": round(float(total_spent / 100), 2),
                     }
                 )
     return cards
@@ -103,3 +104,16 @@ def stock_quote_search(user_stocks):
         )
 
     return stocks
+
+
+def determination_of_the_settlement_period(dates, request_time, range_requested):
+
+    if range_requested.upper() == 'M':
+        request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S").date()
+        request_time_start = request_time_end - timedelta(days=request_time_end.day - 1)
+
+    if range_requested.upper() == 'W':
+        request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S").date()
+        request_time_start = request_time_end - timedelta(days=request_time_end.day - 1)
+
+    return request_time_start, request_time_start

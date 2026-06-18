@@ -1,32 +1,20 @@
 import json
 import os
-from datetime import datetime, timedelta
 
 import pandas as pd
 
 from day_phase import determining_the_phase_of_the_day
-from reading_the_database import about_financial_transactions_xlsx
+from reading_the_database import about_financial_transactions
 from utils import top_transaction_record, recording_card_numbers, record_exchange_rates, stock_quote_search
 
 
-def working_with_transactions(request_time: str):
-    """Функция делает выборки и распечатку транзакций по текущему месяцу относительно заданной даты"""
+def working_with_transactions(request_time: str, range_requested: str):
+    """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
     pd.options.display.expand_frame_repr = False
 
-    # Фильтрование информации из файла
-    request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S").date()
-    request_time_start = request_time_end - timedelta(days=request_time_end.day - 1)
-
-    financial_transactions = about_financial_transactions_xlsx('operations.xlsx').iloc[:, [1, 2, 3, 4, 5, 9, 11]]
-
-    financial_transactions['Дата платежа'] = pd.to_datetime(financial_transactions['Дата платежа'], dayfirst=True)
-    financial_transactions = financial_transactions.loc[
-        (financial_transactions['Дата платежа'] <= pd.to_datetime(request_time_end)) &
-        (financial_transactions['Дата платежа'] >= pd.to_datetime(request_time_start)) &
-        (financial_transactions['Номер карты'].notnull()) &
-        (financial_transactions['Сумма операции'] < 0) &
-        (financial_transactions['Статус'].isin(['OK']))]
+    # Чтение данных и их фильтрация
+    financial_transactions = about_financial_transactions(request_time, range_requested)
 
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
@@ -36,7 +24,7 @@ def working_with_transactions(request_time: str):
     # Чтение файла с заготовками
     path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + 'user_settings.json'
     with open(path, 'r') as f:
-        data=json.load(f)
+        data = json.load(f)
         user_currencies = data['user_currencies']
         user_stocks = data['user_stocks']
 
@@ -52,4 +40,8 @@ def working_with_transactions(request_time: str):
 
     return json_str
 
-# print(working_with_transactions('2018-05-28 12:49:53'))
+if __name__=='__main__':
+    path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + '1.json'
+    data=working_with_transactions('2018-05-28 12:49:53', 'M')
+    with open(path, 'w', encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
