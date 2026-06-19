@@ -1,12 +1,13 @@
 import json
 import os
+from typing import Any
 
 from day_phase import determining_the_phase_of_the_day
 from reading_the_database import working_with_transactions_period
-from utils import top_transaction_record, recording_card_numbers, record_exchange_rates, stock_quote_search
+from utils import top_transaction_record, recording_card_numbers, recording_exchange_rates, recording_stock_quotes
 
 
-def working_with_transactions(request_time: str, period="m"):
+def working_with_transactions(request_time: str, period: str = "m") -> dict[str, str | Any]:
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
     # Чтение данных и их фильтрация
@@ -16,7 +17,6 @@ def working_with_transactions(request_time: str, period="m"):
 
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
-    # types_of_currencies = financial_transactions['Валюта операции'].unique()
     categories = financial_transactions["Категория"].unique()
 
     # Чтение файла с заготовками
@@ -30,9 +30,9 @@ def working_with_transactions(request_time: str, period="m"):
     json_str = {
         "greeting": determining_the_phase_of_the_day(),
         "cards": recording_card_numbers(card_numbers, financial_transactions),
-        "top_transactions": top_transaction_record(card_numbers, categories,financial_transactions),
-        "currency_rates": record_exchange_rates(user_currencies),
-        "stock_prices": stock_quote_search(user_stocks)
+        "top_transactions": top_transaction_record(card_numbers, categories, financial_transactions),
+        "currency_rates": recording_exchange_rates(user_currencies),
+        "stock_prices": recording_stock_quotes(user_stocks)
     }
 
     return json_str

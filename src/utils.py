@@ -1,5 +1,7 @@
+import json
 import os
 from datetime import datetime
+from typing import Any
 
 import requests
 from dotenv import load_dotenv
@@ -7,8 +9,8 @@ from dotenv import load_dotenv
 from external_api import currency_conversion
 
 
-def top_transaction_record(card_numbers, categories, financial_transactions):
-    """Формирует список топовых транзакций в рублях"""
+def top_transaction_record(card_numbers: list, categories: list, financial_transactions: object) -> object:
+    """Формирует список топовых транзакций по картам и категориям"""
 
     top_transactions = []
     for card_number in card_numbers:
@@ -21,11 +23,11 @@ def top_transaction_record(card_numbers, categories, financial_transactions):
                 amount_max = df['Сумма операции'].min()
 
                 top_transactions_df = df.loc[df['Сумма операции'] == amount_max]
-                date = datetime.strptime(top_transactions_df.iloc[0, 0],"%d.%m.%Y %H:%M:%S")
+                date = datetime.strptime(top_transactions_df.iloc[0, 0], "%d.%m.%Y %H:%M:%S")
 
                 top_transactions.append(
                     {
-                        "date": datetime.strftime(date,"%d.%m.%Y"),
+                        "date": datetime.strftime(date, "%d.%m.%Y"),
                         "amount": abs(round(amount_max, 2)),
                         "category": categori,
                         "description": str(top_transactions_df.iloc[0, 6])
@@ -37,7 +39,7 @@ def top_transaction_record(card_numbers, categories, financial_transactions):
     return top_transactions
 
 
-def recording_card_numbers(card_numbers, financial_transactions):
+def recording_card_numbers(card_numbers: list, financial_transactions: object) -> list[dict]:
     """Формирует список карт"""
 
     cards = []
@@ -55,7 +57,7 @@ def recording_card_numbers(card_numbers, financial_transactions):
     return cards
 
 
-def record_exchange_rates(types_of_currencies):
+def recording_exchange_rates(types_of_currencies: list) -> list[dict]:
     """Формирует запись о курсах валют"""
 
     exchange_rates = []
@@ -71,7 +73,7 @@ def record_exchange_rates(types_of_currencies):
     return exchange_rates
 
 
-def stock_quote_search(user_stocks):
+def recording_stock_quotes(user_stocks: list) -> list[dict]:
     """Формирует список котировок акций"""
 
     load_dotenv()
@@ -83,16 +85,96 @@ def stock_quote_search(user_stocks):
         url2 = f"https://api.massive.com/v2/aggs/ticker/{stock}/prev?apiKey={API_KEY}"
 
         try:
-            currency = dict(requests.get(url1).json())['results']["currency_name"]
-            price = dict(requests.get(url2).json())['results'][0]['vw'] * currency_conversion(currency.upper())
+            for i in range(3):
+                response1 = requests.get(url1)
+                response2 = requests.get(url2)
+                if response1.status_code == 200 and response2.status_code == 200:
+                    break
+
+            if response1.status_code != 200 or response2.status_code != 200:
+                raise Exception("Нет связи с БД")
+
         except Exception as e:
             print(e)
 
-        stocks.append(
+        currency = response1.json().get('results').get("currency_name")
+        if currency:
+            price = response2.json().get('results')[0].get('c') * currency_conversion(currency)
+            if price:
+                stocks.append(
+                    {
+                        "stock": stock,
+                        "price": round(price, 2)
+                    }
+                )
+
+    return sorted(stocks, key=lambda x: x["price"], reverse=True)
+
+
+def post_by_category(category_dictionary: list, total_amount_expenses: float) -> list:
+    """Формирует список трат по категориям"""
+
+    # Траты по 7 категориям
+    main = []
+    top_expenses = 0
+    for i in range(7 if len(category_dictionary) >= 7 else len(category_dictionary)):
+        main.append(
             {
-                "stock": stock,
-                "price": round(price, 2)
+                "category": category_dictionary[i][0],
+                "amount": round(abs(category_dictionary[i][1]), 2)
+            }
+        )
+        top_expenses += abs(category_dictionary[i][1])
+
+    # Остальные траты
+    main.append(
+        {
+            "category": "Остальное",
+            "amount": round(total_amount_expenses - top_expenses, 2)
+        }
+    )
+    return main
+
+
+def transfer_recording_and_cache(category_dictionary: list) -> list:
+    """Формирует список трат по типу"""
+    # Траты наличными и переводами
+    transfers_and_cash = [
+        {
+            "category": "Наличные",
+            "amount": round(abs(category_dictionary.get("Наличные", 0)), 2)
+        },
+        {
+            "category": "Переводы",
+            "amount": round(abs(category_dictionary.get("Переводы", 0)), 2)
+        }
+    ]
+    return sorted(transfers_and_cash, key=lambda x: x["amount"], reverse=True)
+
+
+def record_of_replenishments(category_dictionary_income, total_amount_receipts, df) -> dict[str, list[Any] | Any]:
+    """Формирует запись пополнений"""
+
+    main_income = []
+    for category in category_dictionary_income:
+        main_income.append(
+            {
+                "category": category[0],
+                "amount": round(abs(category[1]), 2)
             }
         )
 
-    return sorted(stocks,key=lambda x:x["price"],reverse=True)
+    cashback_amount = df.loc[df['Кэшбэк'].notnull()]['Кэшбэк'].sum()
+    main_income.append(
+        {
+            "category": "Кэшбэк",
+            "amount": round(cashback_amount, 2)
+        }
+    )
+
+    income = {
+        "total_amount": round(total_amount_receipts, 2),
+        "main": main_income
+
+    }
+    return income
