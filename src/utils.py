@@ -1,6 +1,6 @@
-import json
 import os
 from datetime import datetime
+import time
 from typing import Any
 
 import requests
@@ -40,7 +40,7 @@ def top_transaction_record(card_numbers: list, categories: list, financial_trans
 
 
 def recording_card_numbers(card_numbers: list, financial_transactions: object) -> list[dict]:
-    """Формирует список карт"""
+    """Формирует список банковских карт"""
 
     cards = []
     for card_number in card_numbers:
@@ -57,23 +57,22 @@ def recording_card_numbers(card_numbers: list, financial_transactions: object) -
     return cards
 
 
-def recording_exchange_rates(types_of_currencies: list) -> list[dict]:
+def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> list[dict]:
     """Формирует запись о курсах валют"""
 
     exchange_rates = []
     for currency in types_of_currencies:
-        if currency.upper != "RUB":
-            exchange_rates.append(
-                {
-                    "currency": currency,
-                    "rate": round(currency_conversion(currency), 2)
-                }
-            )
+        exchange_rates.append(
+            {
+                "currency": currency,
+                "rate": round(currency_base[currency], 2)
+            }
+        )
 
     return exchange_rates
 
 
-def recording_stock_quotes(user_stocks: list) -> list[dict]:
+def recording_stock_quotes(user_stocks: list,currency_base:dict) -> list[dict]:
     """Формирует список котировок акций"""
 
     load_dotenv()
@@ -92,7 +91,7 @@ def recording_stock_quotes(user_stocks: list) -> list[dict]:
                     break
 
             if response1.status_code != 200 or response2.status_code != 200:
-                print("Нет связи с БД")
+                print("Нет связи с БД. Информация по акциям недоступна.")
                 return []
 
         except Exception as e:
@@ -100,7 +99,7 @@ def recording_stock_quotes(user_stocks: list) -> list[dict]:
 
         currency = response1.json().get('results').get("currency_name")
         if currency:
-            price = response2.json().get('results')[0].get('c') * currency_conversion(currency)
+            price = response2.json().get('results')[0].get('c') * currency_base[currency.upper()]
             if price:
                 stocks.append(
                     {
@@ -137,7 +136,7 @@ def post_by_category(category_dictionary: list, total_amount_expenses: float) ->
     return main
 
 
-def transfer_recording_and_cache(category_dictionary: list) -> list:
+def transfer_recording_and_cache(category_dictionary:dict) -> list:
     """Формирует список трат по типу"""
     # Траты наличными и переводами
     transfers_and_cash = [

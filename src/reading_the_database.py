@@ -39,11 +39,9 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
     df['Номер карты'] = df['Номер карты'].astype(str).apply(lambda x: x[-4:])
 
     # Замена сумм в валюте на рубли в датафрейме
-    exchange_rates = {currency: currency_conversion(currency) for currency in df['Валюта операции'].unique()}
+    currency_base = currency_conversion(df['Валюта операции'].unique())# Создание кэш курсов валют
 
+    df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * currency_base[row['Валюта операции']], axis=1)
+    df['Кэшбэк'] = df.apply(lambda row: row['Кэшбэк'] * currency_base[row['Валюта операции']], axis=1)
 
-    df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * exchange_rates[row['Валюта операции']], axis=1)
-    df['Кэшбэк'] = df.apply(lambda row: row['Кэшбэк'] * exchange_rates[row['Валюта операции']], axis=1)
-
-
-    return df
+    return df, currency_base

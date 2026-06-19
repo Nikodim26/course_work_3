@@ -1,7 +1,7 @@
 import requests
 
 
-def currency_conversion(currency: str)->float:
+def currency_conversion(currencies: list) -> dict:
     """Принимает на вход тип валюты и возвращает курс в рублях"""
 
     try:
@@ -11,7 +11,12 @@ def currency_conversion(currency: str)->float:
                 break
 
         if response.status_code != 200:
-            raise Exception("Нет связи с БД. Конвертация невозможна")
+            print("Нет связи с БД. Конвертация невозможна")
+            return {}
     except Exception as e:
         print(e)
-    return response.json()["Valute"][currency.upper()]["Value"] if currency.upper() !='RUB' else 1
+
+    currency_base = {currency: response.json()["Valute"][currency.upper()]['Value'] if currency.upper() != 'RUB' else 1
+                     for currency in currencies}
+
+    return currency_base

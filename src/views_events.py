@@ -11,10 +11,10 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
     # Чтение данных и их фильтрация
-    df = working_with_transactions_period(request_time, period)
+    df,currency_base = working_with_transactions_period(request_time, period)
 
     total_amount_expenses = abs(df.query('`Сумма операции` < 0')['Сумма операции'].sum())  # общие затраты
-    total_amount_receipts = df.query('`Сумма операции` > 0')['Сумма операции'].sum()  # общие
+    total_amount_receipts = df.query('`Сумма операции` > 0')['Сумма операции'].sum()  # общие поступления
 
     category_dictionary_income = df[df["Сумма операции"] > 0].groupby("Категория")["Сумма операции"].sum()
     category_dictionary_income = sorted(category_dictionary_income.items(), key=lambda item: item[1])
@@ -37,8 +37,8 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
             "main": post_by_category(category_dictionary, total_amount_expenses),
             'transfers_and_cash': transfer_recording_and_cache(dict(category_dictionary)),
             'income': record_of_replenishments(category_dictionary_income, total_amount_receipts, df),
-            "currency_rates": recording_exchange_rates(user_currencies),
-            "stock_prices": recording_stock_quotes(user_stocks)
+            "currency_rates": recording_exchange_rates(user_currencies,currency_base),
+            "stock_prices": recording_stock_quotes(user_stocks,currency_base)
         }
     }
 
