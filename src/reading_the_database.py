@@ -16,6 +16,7 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
         print(f'Произошла ошибка: {e}')
         return []
 
+    currency_base = currency_conversion(df['Валюта операции'].unique())# Создание кэш курсов валют
     request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S")
     # Определение нижней границы поиска в зависимости от периода
     match period.upper():
@@ -39,7 +40,6 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
     df['Номер карты'] = df['Номер карты'].astype(str).apply(lambda x: x[-4:])
 
     # Замена сумм в валюте на рубли в датафрейме
-    currency_base = currency_conversion(df['Валюта операции'].unique())# Создание кэш курсов валют
 
     df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * currency_base[row['Валюта операции']], axis=1)
     df['Кэшбэк'] = df.apply(lambda row: row['Кэшбэк'] * currency_base[row['Валюта операции']], axis=1)
