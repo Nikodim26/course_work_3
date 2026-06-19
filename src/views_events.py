@@ -35,7 +35,7 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
         "expenses": {
             "total_amount": round(total_amount_expenses, 2),
             "main": post_by_category(category_dictionary, total_amount_expenses),
-            'transfers_and_cash': transfer_recording_and_cache(category_dictionary),
+            'transfers_and_cash': transfer_recording_and_cache(dict(category_dictionary)),
             'income': record_of_replenishments(category_dictionary_income, total_amount_receipts, df),
             "currency_rates": recording_exchange_rates(user_currencies),
             "stock_prices": recording_stock_quotes(user_stocks)

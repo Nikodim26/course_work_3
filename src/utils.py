@@ -92,7 +92,8 @@ def recording_stock_quotes(user_stocks: list) -> list[dict]:
                     break
 
             if response1.status_code != 200 or response2.status_code != 200:
-                raise Exception("Нет связи с БД")
+                print("Нет связи с БД")
+                return []
 
         except Exception as e:
             print(e)
