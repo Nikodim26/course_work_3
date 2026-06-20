@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from typing import Any
 
@@ -6,7 +7,7 @@ from reading_the_database import working_with_transactions_period
 from utils import recording_stock_quotes, recording_exchange_rates, post_by_category, transfer_recording_and_cache, \
     record_of_replenishments
 
-
+logger = logging.getLogger(__name__)
 def working_with_transactions_events(request_time: str, period: str = "m") -> dict[str, str | Any]:
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
@@ -30,6 +31,7 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
         user_currencies = data['user_currencies']
         user_stocks = data['user_stocks']
 
+    logger.info('Формирую JSON-запись')
     # Формирование JSON
     json_str = {
         "expenses": {
@@ -41,5 +43,6 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
             "stock_prices": recording_stock_quotes(user_stocks,currency_base)
         }
     }
+    logger.info('JSON-запись сформирована')
 
     return json_str

@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 import time
@@ -56,7 +57,7 @@ def recording_card_numbers(card_numbers: list, financial_transactions: object) -
             )
     return cards
 
-
+logger = logging.getLogger(__name__)
 def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> list[dict]:
     """Формирует запись о курсах валют"""
 
@@ -68,7 +69,7 @@ def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> 
                 "rate": round(currency_base[currency], 2)
             }
         )
-
+    logger.info('Сформирована запись о курсах валют')
     return exchange_rates
 
 
@@ -85,16 +86,20 @@ def recording_stock_quotes(user_stocks: list,currency_base:dict) -> list[dict]:
 
         try:
             for i in range(3):
+                logger.info(f'Делаю запросы по акциям - {i+1} попытка')
                 response1 = requests.get(url1)
                 response2 = requests.get(url2)
                 if response1.status_code == 200 and response2.status_code == 200:
+                    logger.info('Получена информация по акциям')
                     break
 
             if response1.status_code != 200 or response2.status_code != 200:
+                logger.error('Нет связи с БД. Информация по акциям недоступна.')
                 print("Нет связи с БД. Информация по акциям недоступна.")
                 return []
 
         except Exception as e:
+            logger.error(f'Ошибка {e}')
             print(e)
 
         currency = response1.json().get('results').get("currency_name")
@@ -107,6 +112,8 @@ def recording_stock_quotes(user_stocks: list,currency_base:dict) -> list[dict]:
                         "price": round(price, 2)
                     }
                 )
+
+    logger.info('Сформирована запись о котировках акций')
 
     return sorted(stocks, key=lambda x: x["price"], reverse=True)
 
@@ -124,6 +131,7 @@ def post_by_category(category_dictionary: list, total_amount_expenses: float) ->
                 "amount": round(abs(category_dictionary[i][1]), 2)
             }
         )
+
         top_expenses += abs(category_dictionary[i][1])
 
     # Остальные траты
@@ -133,6 +141,8 @@ def post_by_category(category_dictionary: list, total_amount_expenses: float) ->
             "amount": round(total_amount_expenses - top_expenses, 2)
         }
     )
+    logger.info('Сформирован список трат по категориям')
+
     return main
 
 
@@ -149,6 +159,8 @@ def transfer_recording_and_cache(category_dictionary:dict) -> list:
             "amount": round(abs(category_dictionary.get("Переводы", 0)), 2)
         }
     ]
+    logger.info('Сформирован список трат по типу')
+
     return sorted(transfers_and_cash, key=lambda x: x["amount"], reverse=True)
 
 
@@ -177,4 +189,6 @@ def record_of_replenishments(category_dictionary_income, total_amount_receipts, 
         "main": main_income
 
     }
+    logger.info('Сформирована запись пополнений')
+
     return income

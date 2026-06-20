@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from typing import Any
 
@@ -6,7 +7,7 @@ from day_phase import determining_the_phase_of_the_day
 from reading_the_database import working_with_transactions_period
 from utils import top_transaction_record, recording_card_numbers, recording_exchange_rates, recording_stock_quotes
 
-
+logger = logging.getLogger(__name__)
 def working_with_transactions(request_time: str, period: str = "m") -> dict[str, str | Any]:
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
@@ -26,6 +27,7 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
         user_currencies = data['user_currencies']
         user_stocks = data['user_stocks']
 
+    logger.info('Формирую JSON-запись')
     # Формирование JSON
     json_str = {
         "greeting": determining_the_phase_of_the_day(),
@@ -34,5 +36,6 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
         "currency_rates": recording_exchange_rates(user_currencies,currency_base),
         "stock_prices": recording_stock_quotes(user_stocks,currency_base)
     }
+    logger.info('JSON-запись сформирована')
 
     return json_str

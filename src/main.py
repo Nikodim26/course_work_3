@@ -7,12 +7,12 @@ from views import working_with_transactions
 
 from views_events import working_with_transactions_events
 
-path = os.path.dirname(os.path.dirname(__file__)) + "\\logs\\main.log"
+path_log = os.path.dirname(os.path.dirname(__file__)) + "\\logs\\main.log"
 logging.basicConfig(
-    level=logging.INFO, filemode="w", encoding="UTF8", filename=path, datefmt="%d-%m-%Y в %H:%M:%S",
+    level=logging.INFO, filemode="w", encoding="UTF8", filename=path_log, datefmt="%d-%m-%Y в %H:%M:%S",
     format="%(levelname)s: %(asctime)s %(name)s %(message)s"
 )
-logger = logging.getLogger("main")
+logger = logging.getLogger('main')
 
 
 def main(data_time: str) -> None:
@@ -24,6 +24,7 @@ def main(data_time: str) -> None:
     print_json(json_for_main, '1.json')
     logger.info('Конец для "Главная"')
 
+    logger.info('Ожидание периода допуска к API')
     time.sleep(60)
 
     # Строка для фронтенда 'События'
