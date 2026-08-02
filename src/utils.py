@@ -100,8 +100,7 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
 
             if response1.status_code != 200 or response2.status_code != 200:
                 logger.error('Нет связи с БД. Информация по акциям недоступна.')
-                print("Нет связи с БД. Информация по акциям недоступна.")
-                return []
+                continue
 
             currency = response1.json().get('results').get("currency_name")
             price = response2.json().get('results')[0].get('c') * currency_base[currency.upper()]
@@ -113,7 +112,6 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
             )
         except Exception as e:
             logger.error(f'Ошибка {e}')
-            return []
 
     logger.info('Сформирована запись о котировках акций')
     return sorted(stocks, key=lambda x: x["price"], reverse=True)
