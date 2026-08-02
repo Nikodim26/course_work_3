@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +11,7 @@ from utils import (post_by_category, record_of_replenishments,
 logger = logging.getLogger(__name__)
 
 
-def working_with_transactions_events(request_time: str, period: str = "m") -> dict[str, str | Any]:
+def working_with_transactions_events(request_time: str, period: str) -> dict[str, str | Any]:
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
     # Чтение данных и их фильтрация
@@ -39,11 +38,12 @@ def working_with_transactions_events(request_time: str, period: str = "m") -> di
     # Формирование JSON
     json_str = {
         "expenses": {
-            "total_amount": round(total_amount_expenses, 2),
+            "total_amount": round(total_amount_expenses),
             "main": post_by_category(category_dictionary, total_amount_expenses),
             "transfers_and_cash": transfer_recording_and_cache(dict(category_dictionary))
         },
         "income": record_of_replenishments(category_dictionary_income, total_amount_receipts, df),
+
         "currency_rates": recording_exchange_rates(user_currencies, currency_base),
         "stock_prices": recording_stock_quotes(user_stocks, currency_base)
     }

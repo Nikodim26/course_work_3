@@ -15,7 +15,7 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
     # Чтение данных и их фильтрация
     financial_transactions,currency_base = working_with_transactions_period(request_time, period)
 
-    financial_transactions = financial_transactions.loc[financial_transactions['Сумма операции'] < 0]
+    financial_transactions = financial_transactions.loc[financial_transactions['Сумма платежа'] < 0]
 
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions['Номер карты'].unique()
@@ -33,7 +33,9 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
     json_str = {
         "greeting": determining_the_phase_of_the_day(),
         "cards": recording_card_numbers(card_numbers, financial_transactions),
-        "top_transactions": top_transaction_record(card_numbers, categories, financial_transactions),
+
+        "top_transactions": top_transaction_record(financial_transactions),
+
         "currency_rates": recording_exchange_rates(user_currencies,currency_base),
         "stock_prices": recording_stock_quotes(user_stocks,currency_base)
     }

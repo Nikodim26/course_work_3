@@ -9,33 +9,25 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 
 
-def top_transaction_record(card_numbers: list, categories: list, financial_transactions: object) -> object:
-    """Формирует список топовых транзакций по картам и категориям"""
+def top_transaction_record(financial_transactions) -> list[dict]:
+    """Формирует список топовых транзакций по сумме платежа"""
 
     top_transactions = []
     logger.info('Формирую топ транзакций')
-    for card_number in card_numbers:
-        for categori in categories:
-            df = financial_transactions.loc[
-                (financial_transactions["Категория"] == categori) &
-                (financial_transactions['Номер карты'] == card_number)
-                ]
-            if not df.empty:
-                amount_max = df['Сумма операции'].min()
 
-                top_transactions_df = df.loc[df['Сумма операции'] == amount_max]
-                date = datetime.strptime(top_transactions_df.iloc[0, 0], "%d.%m.%Y %H:%M:%S")
+    df = financial_transactions.loc[(financial_transactions["Сумма платежа"] < 0)].nsmallest(5, "Сумма платежа")
 
-                top_transactions.append(
-                    {
-                        "date": datetime.strftime(date, "%d.%m.%Y"),
-                        "amount": abs(round(amount_max, 2)),
-                        "category": categori,
-                        "description": str(top_transactions_df.iloc[0, 6])
-                    }
-                )
+    for _, row in df.iterrows():
+        date = datetime.strptime(str(row["Дата операции"]), "%d.%m.%Y %H:%M:%S")
+        top_transactions.append(
+            {
+                "date": date.strftime("%d.%m.%Y"),
+                "amount": abs(round(row["Сумма платежа"],2)),
+                "category": row["Категория"],
+                "description": row["Описание"],
+            }
+        )
 
-    top_transactions = sorted(top_transactions, key=lambda x: x["amount"], reverse=True)[:5]
     logger.info('Сформирован топ транзакций')
     return top_transactions
 
