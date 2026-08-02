@@ -1,15 +1,16 @@
 import json
 import logging
-import os
 import time
+from pathlib import Path
 
 from views import working_with_transactions
-
 from views_events import working_with_transactions_events
 
-path_log = os.path.dirname(os.path.dirname(__file__)) + "\\logs\\main.log"
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+log_path = BASE_DIR / "logs" / "main.log"
 logging.basicConfig(
-    level=logging.INFO, filemode="w", encoding="UTF8", filename=path_log, datefmt="%d-%m-%Y в %H:%M:%S",
+    level=logging.INFO, filemode="w", encoding="UTF8", filename=log_path, datefmt="%d-%m-%Y в %H:%M:%S",
     format="%(levelname)s: %(asctime)s %(name)s %(message)s"
 )
 logger = logging.getLogger('main')
@@ -24,10 +25,9 @@ def main(data_time: str) -> None:
     print_json(json_for_main, '1.json')
     logger.info('Конец для "Главная"')
 
+    # Строка для фронтенда 'События'
     logger.info('Ожидание периода допуска к API')
     time.sleep(60)
-
-    # Строка для фронтенда 'События'
     logger.info('Для "События" поехали')
     json_for_events = working_with_transactions_events(data_time, 'w')
     print_json(json_for_events, '2.json')
@@ -35,11 +35,11 @@ def main(data_time: str) -> None:
 
 
 def print_json(data, file):
-    logger.info('Начал выводить инфу в JSON-файл, для контроля, пока бэкэндер спит')
-    path_file = os.path.dirname(os.path.dirname(__file__)) + "\\data\\"
-    with open(path_file + file, 'w', encoding="utf-8") as f:
+    logger.info('Начал выводить информацию в JSON-файл, для контроля')
+    json_path = BASE_DIR / "data" / f"{file}"
+    with open(json_path, 'w', encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-    logger.info('Закончил выводить инфу в JSON-файл, для контроля, пока бэкэндер спит')
+    logger.info('Закончил выводить информацию в JSON-файл, для контроля')
 
 
 if __name__ == '__main__':

@@ -1,11 +1,12 @@
 import json
 import logging
-import os
+from pathlib import Path
 from typing import Any
 
 from day_phase import determining_the_phase_of_the_day
 from reading_the_database import working_with_transactions_period
-from utils import top_transaction_record, recording_card_numbers, recording_exchange_rates, recording_stock_quotes
+from utils import (recording_card_numbers, recording_exchange_rates,
+                   recording_stock_quotes, top_transaction_record)
 
 logger = logging.getLogger(__name__)
 def working_with_transactions(request_time: str, period: str = "m") -> dict[str, str | Any]:
@@ -21,8 +22,8 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
     categories = financial_transactions["Категория"].unique()
 
     # Чтение файла с заготовками
-    path = os.path.dirname(os.path.dirname(__file__)) + "\\data\\" + 'user_settings.json'
-    with open(path, 'r') as f:
+    data_path = Path(__file__).resolve().parent.parent / "user_settings.json"
+    with open(data_path, 'r') as f:
         data = json.load(f)
         user_currencies = data['user_currencies']
         user_stocks = data['user_stocks']
