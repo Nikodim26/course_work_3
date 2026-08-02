@@ -15,10 +15,14 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
     data_path = Path(__file__).resolve().parent.parent / "data" / "operations.xlsx"
 
     try:
-        df = pd.read_excel(data_path).iloc[:, [0, 2, 3, 4, 5, 8, 9, 11]]
+        df = pd.read_excel(data_path)[[
+            "Дата операции", "Номер карты", "Статус",
+            "Сумма операции", "Валюта операции",
+            "Сумма платежа", "Категория", "Описание"
+        ]]
+
     except Exception as e:
         logger.error('Не удалось прочитать данные')
-        print(f'Произошла ошибка: {e}')
         return []
 
     logger.info('Данные получены. Выбраны интересующие позиции')
@@ -44,11 +48,11 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
         (df['Статус'].isin(['OK']))
         ]
     # Замена записей номеров карт в датафрейме
-    df['Номер карты'] = df['Номер карты'].astype(str).apply(lambda x: x[-4:])
+    df['Номер карты'] = df['Номер карты'].apply(lambda x: x[-4:])
 
     # Замена сумм в валюте на рубли в датафрейме
     df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * currency_base[row['Валюта операции']], axis=1)
-    df['Кэшбэк'] = df.apply(lambda row: row['Кэшбэк'] * currency_base[row['Валюта операции']], axis=1)
+    df['Сумма платежа'] = df.apply(lambda row: row['Сумма платежа'] * currency_base[row['Валюта операции']], axis=1)
     logger.info('Датафрейм отфильтрован')
 
     return df, currency_base
