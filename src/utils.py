@@ -103,22 +103,19 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
                 print("Нет связи с БД. Информация по акциям недоступна.")
                 return []
 
+            currency = response1.json().get('results').get("currency_name")
+            price = response2.json().get('results')[0].get('c') * currency_base[currency.upper()]
+            stocks.append(
+                {
+                    "stock": stock,
+                    "price": round(price, 2)
+                }
+            )
         except Exception as e:
             logger.error(f'Ошибка {e}')
-
-        currency = response1.json().get('results').get("currency_name")
-        if currency:
-            price = response2.json().get('results')[0].get('c') * currency_base[currency.upper()]
-            if price:
-                stocks.append(
-                    {
-                        "stock": stock,
-                        "price": round(price, 2)
-                    }
-                )
+            return []
 
     logger.info('Сформирована запись о котировках акций')
-
     return sorted(stocks, key=lambda x: x["price"], reverse=True)
 
 
