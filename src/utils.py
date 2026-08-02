@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
+
 def top_transaction_record(card_numbers: list, categories: list, financial_transactions: object) -> object:
     """Формирует список топовых транзакций по картам и категориям"""
 
@@ -60,8 +61,6 @@ def recording_card_numbers(card_numbers: list, financial_transactions: object) -
     return cards
 
 
-
-
 def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> list[dict]:
     """Формирует запись о курсах валют"""
 
@@ -106,7 +105,6 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
 
         except Exception as e:
             logger.error(f'Ошибка {e}')
-            print(e)
 
         currency = response1.json().get('results').get("currency_name")
         if currency:
