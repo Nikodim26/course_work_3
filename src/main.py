@@ -20,14 +20,14 @@ def main(data_time: str, period: str) -> None:
     """Функция выдает JSON строки для фронтенда 'Главная' и 'События'"""
 
     # Строка для фронтенда 'Главная'
-    # logger.info('Для "Главная" поехали')
-    # json_for_main = working_with_transactions(data_time)
-    # print_json(json_for_main, '1.json')
-    # logger.info('Конец для "Главная"')
+    logger.info('Для "Главная" поехали')
+    json_for_main = working_with_transactions(data_time)
+    print_json(json_for_main, '1.json')
+    logger.info('Конец для "Главная"')
 
     # Строка для фронтенда 'События'
-    # logger.info('Ожидание периода допуска к API')
-    # time.sleep(60)
+    logger.info('Ожидание периода допуска к API')
+    time.sleep(60)
     logger.info('Для "События" поехали')
     json_for_events = working_with_transactions_events(data_time, period)
     print_json(json_for_events, '2.json')

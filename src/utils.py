@@ -1,7 +1,6 @@
 import logging
 import os
 from datetime import datetime
-from typing import Any
 
 import requests
 from dotenv import load_dotenv
@@ -65,6 +64,7 @@ def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> 
                 "rate": round(currency_base[currency], 2)
             }
         )
+
     logger.info('Сформирована запись о курсах валют')
     return exchange_rates
 
@@ -107,83 +107,3 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
 
     logger.info('Сформирована запись о котировках акций')
     return sorted(stocks, key=lambda x: x["price"], reverse=True)
-
-
-def post_by_category(category_dictionary: list, total_amount_expenses: float) -> list:
-    """Формирует список трат по категориям"""
-
-    # Траты по 7 категориям
-    main = []
-    logger.info('Формирую список трат по категориям')
-    top_expenses = 0
-    for i in range(7 if len(category_dictionary) >= 7 else len(category_dictionary)):
-        main.append(
-            {
-                "category": category_dictionary[i][0],
-                "amount": round(abs(category_dictionary[i][1]), 2)
-            }
-        )
-
-        top_expenses += abs(category_dictionary[i][1])
-
-    # Остальные траты
-    main.append(
-        {
-            "category": "Остальное",
-            "amount": round(total_amount_expenses - top_expenses, 2)
-        }
-    )
-    logger.info('Сформирован список трат по категориям')
-
-    return main
-
-
-def transfer_recording_and_cache(category_dictionary: dict) -> list:
-    """Формирует список трат по типу"""
-
-    # Траты наличными и переводами
-    logger.info('Формирую список трат по типу')
-    transfers_and_cash = [
-        {
-            "category": "Наличные",
-            "amount": round(abs(category_dictionary.get("Наличные", 0)), 2)
-        },
-        {
-            "category": "Переводы",
-            "amount": round(abs(category_dictionary.get("Переводы", 0)), 2)
-        }
-    ]
-    logger.info('Сформирован список трат по типу')
-
-    return sorted(transfers_and_cash, key=lambda x: x["amount"], reverse=True)
-
-
-def record_of_replenishments(category_dictionary_income, total_amount_receipts, df) -> dict[str, list[Any] | Any]:
-    """Формирует запись пополнений"""
-
-    main_income = []
-    logger.info('Формирую запись о пополнениях')
-    for category in category_dictionary_income:
-        main_income.append(
-            {
-                "category": category[0],
-                "amount": round(abs(category[1]), 2)
-            }
-        )
-
-    cashback_amount = df.loc[df['Кэшбэк'].notnull()]['Кэшбэк'].sum()
-    main_income.append(
-        {
-            "category": "Кэшбэк",
-            "amount": round(cashback_amount, 2)
-        }
-    )
-
-    income = {
-        "total_amount": round(total_amount_receipts, 2),
-        "main": main_income
-
-    }
-    logger.info('Сформирована запись о пополнениях')
-
-    return income
