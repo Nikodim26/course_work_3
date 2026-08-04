@@ -21,7 +21,7 @@ def currency_conversion(currencies: list) -> dict:
             print("Нет связи с БД. Конвертация невозможна")
             return {}
     except Exception as e:
-        print(e)
+        logger.error(e)
 
     currency_base = {currency: response.json()["Valute"][currency.upper()]['Value'] if currency.upper() != 'RUB' else 1
                      for currency in currencies}

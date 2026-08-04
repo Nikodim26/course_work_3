@@ -22,7 +22,7 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
         ]]
 
     except Exception as e:
-        logger.error('Не удалось прочитать данные')
+        logger.error(f'Не удалось прочитать данные {e}')
         return []
 
     logger.info('Данные получены. Выбраны интересующие позиции')
