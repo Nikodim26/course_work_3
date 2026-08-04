@@ -18,7 +18,6 @@ def working_with_transactions_events(request_time: str, period: str) -> dict[str
     total_amount_expenses = abs(df.query('`Сумма операции` < 0')['Сумма операции'].sum())  # общие затраты
     total_amount_receipts = abs(df.query('`Сумма операции` > 0')['Сумма операции'].sum())  # общие поступления
 
-
     category_dictionary = (
         df[df["Сумма операции"] < 0]
         .groupby("Категория")["Сумма операции"]
@@ -62,13 +61,13 @@ def working_with_transactions_events(request_time: str, period: str) -> dict[str
             "main": main,
             "transfers_and_cash": transfers_and_cash
         },
-        "income":{
-        "total_amount": round(total_amount_receipts),
-        "main": [
-            {"category": name, "amount": round(amount)}
-            for name, amount in category_dictionary_income.items()
-        ],
-    },
+        "income": {
+            "total_amount": round(total_amount_receipts),
+            "main": [
+                {"category": name, "amount": round(amount)}
+                for name, amount in category_dictionary_income.items()
+            ],
+        },
         "currency_rates": recording_exchange_rates(user_currencies, currency_base),
         "stock_prices": recording_stock_quotes(user_stocks, currency_base)
     }
