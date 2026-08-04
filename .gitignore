@@ -93,4 +93,3 @@ marimo/_lsp/
 __marimo__/
 .streamlit/secrets.toml
 .idea
-mylog.txt
