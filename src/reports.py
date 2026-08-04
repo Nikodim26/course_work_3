@@ -17,6 +17,7 @@ def receiving_a_dataframe_with_transactions() -> DataFrame | None:
     try:
         df = pd.read_excel(data_path)[
             ["Дата операции", "Статус", "Валюта операции", "Сумма платежа", "Категория", "Номер карты"]]
+        logger.info('Получены данные')
     except Exception as e:
         logger.error(e)
         return None
@@ -26,6 +27,8 @@ def receiving_a_dataframe_with_transactions() -> DataFrame | None:
     df = df.loc[df['Сумма платежа'] < 0]
     df['Сумма платежа'] = df.apply(lambda row: row['Сумма платежа'] * currency_base[row['Валюта операции']], axis=1)
     df = df.loc[:, ["Дата операции", "Сумма платежа", "Категория"]]
+
+    logger.info('Датафрейм отфильтрован')
 
     return df
 
