@@ -3,6 +3,7 @@ import logging
 import time
 from pathlib import Path
 
+from reports import spending_by_category, receiving_a_dataframe_with_transactions
 from services import determination_of_cashback_categories, receiving_cashback_data
 from views import working_with_transactions
 from views_events import working_with_transactions_events
@@ -43,6 +44,8 @@ def main(data_time: str, period: str) -> None:
     logger.info('Конец для "События"')
 
     print(determination_of_cashback_categories(receiving_cashback_data(),'2020','11'))
+
+    spending_by_category(receiving_a_dataframe_with_transactions(), 'Супермаркеты', '28.05.2019')
 
 
 
