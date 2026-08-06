@@ -24,11 +24,7 @@ def currency_conversion(currencies: list) -> dict:
         logger.error(e)
 
     currency_base = {
-        currency: (
-            response.json()["Valute"][currency.upper()]["Value"]
-            if currency.upper() != "RUB"
-            else 1
-        )
+        currency: (response.json()["Valute"][currency.upper()]["Value"] if currency.upper() != "RUB" else 1)
         for currency in currencies
     }
     logger.info("Создана база курсов валют")

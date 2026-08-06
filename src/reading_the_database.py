@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -33,22 +34,16 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
         return []
 
     logger.info("Данные получены. Выбраны интересующие позиции")
-    currency_base = currency_conversion(
-        df["Валюта операции"].unique()
-    )  # Создание кэш курсов валют
+    currency_base = currency_conversion(df["Валюта операции"].unique())  # Создание кэш курсов валют
     request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S")
     # Определение нижней границы поиска в зависимости от периода
     match period.upper():
         case "M" | "М":  # Учет алфавита
-            request_time_start = request_time_end.replace(
-                day=1, hour=0, minute=0, second=0
-            )
+            request_time_start = request_time_end.replace(day=1, hour=0, minute=0, second=0)
         case "W":
             request_time_start = request_time_end - timedelta(weeks=1)
         case "Y":
-            request_time_start = request_time_end.replace(
-                day=1, month=1, hour=0, minute=0, second=0
-            )
+            request_time_start = request_time_end.replace(day=1, month=1, hour=0, minute=0, second=0)
         case "ALL":
             request_time_start = pd.to_datetime(df["Дата операции"]).min()
 
@@ -68,9 +63,7 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
         lambda row: row["Сумма операции"] * currency_base[row["Валюта операции"]],
         axis=1,
     )
-    df["Сумма платежа"] = df.apply(
-        lambda row: row["Сумма платежа"] * currency_base[row["Валюта операции"]], axis=1
-    )
+    df["Сумма платежа"] = df.apply(lambda row: row["Сумма платежа"] * currency_base[row["Валюта операции"]], axis=1)
     logger.info("Датафрейм отфильтрован")
 
     return df, currency_base

@@ -15,9 +15,7 @@ def top_transaction_record(financial_transactions) -> list[dict]:
     top_transactions = []
     logger.info("Формирую топ транзакций")
 
-    df = financial_transactions.loc[
-        (financial_transactions["Сумма платежа"] < 0)
-    ].nsmallest(5, "Сумма платежа")
+    df = financial_transactions.loc[(financial_transactions["Сумма платежа"] < 0)].nsmallest(5, "Сумма платежа")
 
     for _, row in df.iterrows():
         date = datetime.strptime(str(row["Дата операции"]), "%d.%m.%Y %H:%M:%S")
@@ -34,17 +32,13 @@ def top_transaction_record(financial_transactions) -> list[dict]:
     return top_transactions
 
 
-def recording_card_numbers(
-    card_numbers: list, financial_transactions: pd.DataFrame
-) -> list[dict]:
+def recording_card_numbers(card_numbers: list, financial_transactions: pd.DataFrame) -> list[dict]:
     """Формирует список банковских карт"""
 
     cards = []
     logger.info("Формирую список банковских карт")
     for card_number in card_numbers:
-        df = financial_transactions.loc[
-            (financial_transactions["Номер карты"] == card_number)
-        ]
+        df = financial_transactions.loc[(financial_transactions["Номер карты"] == card_number)]
         if not df.empty:
             amount_of_expenses = abs(df["Сумма операции"].sum())
             cards.append(
@@ -59,17 +53,13 @@ def recording_card_numbers(
     return cards
 
 
-def recording_exchange_rates(
-    types_of_currencies: list, currency_base: dict
-) -> list[dict]:
+def recording_exchange_rates(types_of_currencies: list, currency_base: dict) -> list[dict]:
     """Формирует запись о курсах валют"""
 
     exchange_rates = []
     logger.info("Формирую запись о курсах валют")
     for currency in types_of_currencies:
-        exchange_rates.append(
-            {"currency": currency, "rate": round(currency_base[currency], 2)}
-        )
+        exchange_rates.append({"currency": currency, "rate": round(currency_base[currency], 2)})
 
     logger.info("Сформирована запись о курсах валют")
     return exchange_rates
@@ -101,10 +91,7 @@ def recording_stock_quotes(user_stocks: list, currency_base: dict) -> list[dict]
                 continue
 
             currency = response1.json().get("results").get("currency_name")
-            price = (
-                response2.json().get("results")[0].get("c")
-                * currency_base[currency.upper()]
-            )
+            price = response2.json().get("results")[0].get("c") * currency_base[currency.upper()]
             stocks.append({"stock": stock, "price": round(price, 2)})
         except Exception as e:
             logger.error(f"Ошибка {e}")

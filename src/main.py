@@ -3,8 +3,10 @@ import logging
 import time
 from pathlib import Path
 
-from reports import receiving_a_dataframe_with_transactions, spending_by_category
-from services import determination_of_cashback_categories, receiving_cashback_data
+from reports import receiving_a_dataframe_with_transactions
+from reports import spending_by_category
+from services import determination_of_cashback_categories
+from services import receiving_cashback_data
 from views import working_with_transactions
 from views_events import working_with_transactions_events
 
@@ -49,9 +51,7 @@ def main(data_time: str, period: str) -> None:
 
     print(determination_of_cashback_categories(receiving_cashback_data(), "2020", "11"))
 
-    spending_by_category(
-        receiving_a_dataframe_with_transactions(), "Супермаркеты", "28.05.2019"
-    )
+    spending_by_category(receiving_a_dataframe_with_transactions(), "Супермаркеты", "28.05.2019")
 
 
 if __name__ == "__main__":

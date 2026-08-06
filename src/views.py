@@ -5,29 +5,21 @@ from typing import Any
 
 from day_phase import determining_the_phase_of_the_day
 from reading_the_database import working_with_transactions_period
-from utils import (
-    recording_card_numbers,
-    recording_exchange_rates,
-    recording_stock_quotes,
-    top_transaction_record,
-)
+from utils import recording_card_numbers
+from utils import recording_exchange_rates
+from utils import recording_stock_quotes
+from utils import top_transaction_record
 
 logger = logging.getLogger(__name__)
 
 
-def working_with_transactions(
-    request_time: str, period: str = "m"
-) -> dict[str, str | Any]:
+def working_with_transactions(request_time: str, period: str = "m") -> dict[str, str | Any]:
     """Функция делает выборки и распечатку транзакций по заданному периоду относительно заданной даты"""
 
     # Чтение данных и их фильтрация
-    financial_transactions, currency_base = working_with_transactions_period(
-        request_time, period
-    )
+    financial_transactions, currency_base = working_with_transactions_period(request_time, period)
 
-    financial_transactions = financial_transactions.loc[
-        financial_transactions["Сумма платежа"] < 0
-    ]
+    financial_transactions = financial_transactions.loc[financial_transactions["Сумма платежа"] < 0]
 
     # Извлечение данных из отфильтрованного файла
     card_numbers = financial_transactions["Номер карты"].unique()
