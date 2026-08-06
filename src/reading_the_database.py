@@ -15,44 +15,62 @@ def working_with_transactions_period(request_time: str, period: str) -> object:
     data_path = Path(__file__).resolve().parent.parent / "data" / "operations.xlsx"
 
     try:
-        df = pd.read_excel(data_path)[[
-            "Дата операции", "Номер карты", "Статус",
-            "Сумма операции", "Валюта операции",
-            "Сумма платежа", "Категория", "Описание"
-        ]]
+        df = pd.read_excel(data_path)[
+            [
+                "Дата операции",
+                "Номер карты",
+                "Статус",
+                "Сумма операции",
+                "Валюта операции",
+                "Сумма платежа",
+                "Категория",
+                "Описание",
+            ]
+        ]
 
     except Exception as e:
-        logger.error(f'Не удалось прочитать данные {e}')
+        logger.error(f"Не удалось прочитать данные {e}")
         return []
 
-    logger.info('Данные получены. Выбраны интересующие позиции')
-    currency_base = currency_conversion(df['Валюта операции'].unique())  # Создание кэш курсов валют
+    logger.info("Данные получены. Выбраны интересующие позиции")
+    currency_base = currency_conversion(
+        df["Валюта операции"].unique()
+    )  # Создание кэш курсов валют
     request_time_end = datetime.strptime(request_time, "%Y-%m-%d %H:%M:%S")
     # Определение нижней границы поиска в зависимости от периода
     match period.upper():
-        case 'M' | 'М':  # Учет алфавита
-            request_time_start = request_time_end.replace(day=1, hour=0, minute=0, second=0)
-        case 'W':
+        case "M" | "М":  # Учет алфавита
+            request_time_start = request_time_end.replace(
+                day=1, hour=0, minute=0, second=0
+            )
+        case "W":
             request_time_start = request_time_end - timedelta(weeks=1)
-        case 'Y':
-            request_time_start = request_time_end.replace(day=1, month=1, hour=0, minute=0, second=0)
-        case 'ALL':
-            request_time_start = pd.to_datetime(df['Дата операции']).min()
+        case "Y":
+            request_time_start = request_time_end.replace(
+                day=1, month=1, hour=0, minute=0, second=0
+            )
+        case "ALL":
+            request_time_start = pd.to_datetime(df["Дата операции"]).min()
 
-    logger.info('Определены временные границы поиска')
+    logger.info("Определены временные границы поиска")
     # Фильтрация списка транзакций
     df = df.loc[
-        (pd.to_datetime(df['Дата операции'], dayfirst=True) <= request_time_end) &
-        (pd.to_datetime(df['Дата операции'], dayfirst=True) >= request_time_start) &
-        (df['Номер карты'].notnull()) &
-        (df['Статус'].isin(['OK']))
-        ]
+        (pd.to_datetime(df["Дата операции"], dayfirst=True) <= request_time_end)
+        & (pd.to_datetime(df["Дата операции"], dayfirst=True) >= request_time_start)
+        & (df["Номер карты"].notnull())
+        & (df["Статус"].isin(["OK"]))
+    ]
     # Замена записей номеров карт в датафрейме
-    df['Номер карты'] = df['Номер карты'].apply(lambda x: x[-4:])
+    df["Номер карты"] = df["Номер карты"].apply(lambda x: x[-4:])
 
     # Замена сумм в валюте на рубли в датафрейме
-    df['Сумма операции'] = df.apply(lambda row: row['Сумма операции'] * currency_base[row['Валюта операции']], axis=1)
-    df['Сумма платежа'] = df.apply(lambda row: row['Сумма платежа'] * currency_base[row['Валюта операции']], axis=1)
-    logger.info('Датафрейм отфильтрован')
+    df["Сумма операции"] = df.apply(
+        lambda row: row["Сумма операции"] * currency_base[row["Валюта операции"]],
+        axis=1,
+    )
+    df["Сумма платежа"] = df.apply(
+        lambda row: row["Сумма платежа"] * currency_base[row["Валюта операции"]], axis=1
+    )
+    logger.info("Датафрейм отфильтрован")
 
     return df, currency_base

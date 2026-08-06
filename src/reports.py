@@ -18,19 +18,31 @@ def receiving_a_dataframe_with_transactions() -> pd.DataFrame | None:
 
     try:
         df = pd.read_excel(data_path)[
-            ["Дата операции", "Статус", "Валюта операции", "Сумма платежа", "Категория", "Номер карты"]]
-        logger.info('Получены данные')
+            [
+                "Дата операции",
+                "Статус",
+                "Валюта операции",
+                "Сумма платежа",
+                "Категория",
+                "Номер карты",
+            ]
+        ]
+        logger.info("Получены данные")
     except Exception as e:
         logger.error(e)
         return None
 
-    df = df.loc[(df['Номер карты'].notnull()) & (df['Статус'].isin(['OK']))]
-    currency_base = currency_conversion(df['Валюта операции'].unique())  # Создание кэш курсов валют
-    df = df.loc[df['Сумма платежа'] < 0]
-    df['Сумма платежа'] = df.apply(lambda row: row['Сумма платежа'] * currency_base[row['Валюта операции']], axis=1)
+    df = df.loc[(df["Номер карты"].notnull()) & (df["Статус"].isin(["OK"]))]
+    currency_base = currency_conversion(
+        df["Валюта операции"].unique()
+    )  # Создание кэш курсов валют
+    df = df.loc[df["Сумма платежа"] < 0]
+    df["Сумма платежа"] = df.apply(
+        lambda row: row["Сумма платежа"] * currency_base[row["Валюта операции"]], axis=1
+    )
     df = df.loc[:, ["Дата операции", "Сумма платежа", "Категория"]]
 
-    logger.info('Датафрейм отфильтрован')
+    logger.info("Датафрейм отфильтрован")
 
     return df
 
@@ -54,7 +66,9 @@ def my_decorator(filename: str):
 
 
 @my_decorator("df.xlsx")
-def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
+def spending_by_category(
+    transactions: pd.DataFrame, category: str, date: Optional[str] = None
+) -> pd.DataFrame:
     """Функция возвращает траты по заданной категории за последние три месяца (от переданной даты)"""
 
     if date:
@@ -65,9 +79,15 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     request_time_start = request_time_end - timedelta(weeks=12)
 
     df = transactions.loc[
-        (pd.to_datetime(transactions['Дата операции'], dayfirst=True) <= request_time_end) &
-        (pd.to_datetime(transactions['Дата операции'], dayfirst=True) >= request_time_start) &
-        (transactions['Категория'] == category)
-        ]
+        (
+            pd.to_datetime(transactions["Дата операции"], dayfirst=True)
+            <= request_time_end
+        )
+        & (
+            pd.to_datetime(transactions["Дата операции"], dayfirst=True)
+            >= request_time_start
+        )
+        & (transactions["Категория"] == category)
+    ]
 
     return df
