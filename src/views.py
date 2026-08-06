@@ -30,7 +30,7 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
 
     logger.info('Формирую JSON-запись')
     # Формирование JSON
-    json_str = {
+    json_dict = {
         "greeting": determining_the_phase_of_the_day(),
         "cards": recording_card_numbers(card_numbers, financial_transactions),
 
@@ -41,4 +41,10 @@ def working_with_transactions(request_time: str, period: str = "m") -> dict[str,
     }
     logger.info('JSON-запись сформирована')
 
-    return json_str
+    return json_dict
+
+if __name__ == '__main__':
+    b=working_with_transactions("2018-05-28 12:49:53")
+    print(type(b))
+    a = [i for i in b.keys()]
+    print(a)

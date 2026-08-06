@@ -16,16 +16,13 @@ def determining_the_phase_of_the_day() -> str:
     logger.info('Получен набор временных отрезков')
     for i in range(0, 6, 2):
         if time_list[i] <= datetime.now().time() <= time_list[i + 1]:
+            logger.info('Фаза дня определена')
             match i:
                 case 0:
-                    logger.info('Понял где и когда я')
                     return "Доброе утро"
                 case 2:
-                    logger.info('Понял где и когда я')
                     return "Добрый день"
                 case 4:
-                    logger.info('Понял где и когда я')
                     return "Добрый вечер"
 
-    logger.info('Понял когда я')
     return "Доброй ночи"
